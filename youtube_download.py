@@ -22,19 +22,28 @@ class YTDL:
             finally:
                 sys.stdout = old_stdout
 
-    def download_song(
-        self, song_title, target_path=None, just_meta=False, artist=""
+    def download_track(
+        self,
+        target_path,
+        artist_name,
+        album_title,
+        track_title,
+        just_meta=False,
     ):
-        # downloads a song using song title
-
-        # append song name to ytsearch option in ytdl
-        song_url = "ytsearch1:{} {}".format(song_title, artist)
+        # append track name to ytsearch option in ytdl
+        track_url = "ytsearch1:{} {} {}".format(
+            artist_name, album_title, track_title
+        )
 
         # set output path using the user's home directory
         # for cross-platform compatibility
         if not target_path:
             target_path = os.path.join(
-                os.path.expanduser("~"), "Desktop", "song_script", artist
+                os.path.expanduser("~"),
+                "Desktop",
+                "discography-dl",
+                artist_name,
+                album_title,
             )
 
         # create directory if it doesn't exist
@@ -49,22 +58,21 @@ class YTDL:
 
         # set the output template using os.path.join
         self.ydl_opts["outtmpl"] = os.path.join(
-            target_path, "{} - {}.%(ext)s".format(artist, song_title)
+            target_path,
+            "{}.%(ext)s".format(track_title),
         )
-        # print(self.ydl_opts['outtmpl'])
 
         # check if the song is already downloaded
         for file in os.listdir(target_path):
             filename = os.fsdecode(file)
-            if filename == "{} - {}.mp3".format(artist, song_title):
+            if filename == "{}.mp3".format(track_title):
                 print("File already cached.")
                 return None
 
-        # download the song
         try:
             print("-" * 60)
             with youtube_dl.YoutubeDL(self.ydl_opts) as ydl:
-                info_dict = ydl.extract_info(song_url, download=not just_meta)
+                info_dict = ydl.extract_info(track_url, download=not just_meta)
         except youtube_dl.utils.DownloadError:
             print("-" * 60)
             print("Video not found.")

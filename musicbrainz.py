@@ -1,10 +1,9 @@
 import requests
 
 
-class SongScraper:
+class TrackQuery:
     def __init__(self, artist):
-        # edit artist name so it can be inserted into link
-        self.artist = artist.replace(" ", "").lower()
+        self.artist = artist
 
     def _search_artists(self):
         """Search for artists by name."""
@@ -125,7 +124,7 @@ class SongScraper:
                 tracks.append(track.get("title", "Unknown"))
         return tracks
 
-    def scrape_songs(self):
+    def get_album_tracks(self):
         artists = self._search_artists()
         if not artists:
             print("No artists found.")
@@ -133,7 +132,7 @@ class SongScraper:
 
         # If multiple artists are found, let the user choose one.
         if len(artists) > 1:
-            print("Multiple artists found:")
+            print("\nMultiple artists found:")
             chosen_artist = self._choose_from_list(artists, item_type="artist")
         else:
             chosen_artist = artists[0]
@@ -160,7 +159,7 @@ class SongScraper:
             print("No releases found for this album.")
             return
         if len(releases) > 1:
-            print("Multiple releases found for this album:")
+            print("\nMultiple releases found for this album:")
             chosen_release = self._choose_from_list(
                 releases, item_type="release"
             )
@@ -176,4 +175,4 @@ class SongScraper:
             print("Tracks: ", tracks)
         else:
             print("No tracks found.")
-        return tracks
+        return artist_name, album_title, tracks

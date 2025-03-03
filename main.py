@@ -1,6 +1,6 @@
 import sys
 
-from scraper import SongScraper
+from musicbrainz import TrackQuery
 from youtube_download import YTDL
 
 ydl_opts = {
@@ -18,10 +18,7 @@ yt = YTDL(ydl_opts)
 
 def enter_artist():
     while True:
-        artist_name = input(
-            "\nEnter name of your artist"
-            " (how you want it to be spelled in mp3 files): \n"
-        )
+        artist_name = input("\nEnter artist name: \n")
         if artist_name:
             return artist_name
 
@@ -59,24 +56,29 @@ def confirm_download(meta_data):
 
 def enter_path():
     answer = input(
-        "\nEnter absolute path to save songs "
+        "\nEnter path for discography-dl to save albums "
         "(leave empty to create folder on desktop): \n"
     )
     return answer
 
 
-def choose_songs():
+def select_mode():
     answer = input(
-        "Do you wanna choose songs or just download everything?\n"
-        "Note: some songs might be incorrectly chosen.\n"
-        "(type y for yes; any key for no)\n"
+        "\nEnable interactive mode?\n"
+        "Note: some songs might be incorrectly chosen in automatic mode.\n"
+        "(type y for interactive; any key for automatic)\n"
     )
     return True if answer.lower() == "y" else False
 
 
-def download_song(song, path, artist):
-    print("\nDownloading song...")
-    if yt.download_song(song_title=song, target_path=path, artist=artist):
+def download_song(target_path, artist_name, album_title, track_title):
+    print(f"\nDownloading track: {track_title}")
+    if yt.download_track(
+        album_title=album_title,
+        target_path=target_path,
+        track_title=track_title,
+        artist_name=artist_name,
+    ):
         print("\nDownload successful.\n")
     else:
         print("\nDownload unsuccessful.\n")
@@ -84,39 +86,53 @@ def download_song(song, path, artist):
 
 
 def main():
-    path = enter_path()
-    artist = enter_artist()
-    choice_on = choose_songs()
-    song_scraper = SongScraper(artist)
-    song_list = song_scraper.scrape_songs()
-    if len(song_list) < 1:
-        if try_again():
-            main()
-        else:
-            sys.exit()
-    for song in song_list:
-        if choice_on:
-            print("-" * 60)
-            print("\nDownloading info about song: {}\n".format(song))
-            meta = yt.download_song(
-                song_title=song, just_meta=True, artist=artist
-            )
-            if meta:
-                if confirm_download(meta):
-                    download_song(song, path, artist)
-                else:
-                    continue
-        else:
-            download_song(song, path, artist)
+    target_path = enter_path()
+    is_interactive = select_mode()
 
-    answer = input(
-        "\n\nEnd of song list reached. Do you want to continue with another"
-        " artist? (press y for yes; press key for no)"
-    )
-    if answer == "y":
-        main()
-    else:
-        sys.exit()
+    while True:
+        artist_name = enter_artist()
+        track_query = TrackQuery(artist_name)
+        # Replace artist name with the one returned by the scraper
+        artist_name, album_title, track_list = track_query.get_album_tracks()
+        if len(track_list) < 1:
+            if try_again():
+                main()
+            else:
+                sys.exit()
+        for track_title in track_list:
+            if is_interactive:
+                print("-" * 60)
+                print(
+                    "\nDownloading info about track: {}\n".format(track_title)
+                )
+                meta = yt.download_track(
+                    album_title=album_title,
+                    target_path=target_path,
+                    track_title=track_title,
+                    artist_name=artist_name,
+                    just_meta=True,
+                )
+                if meta and confirm_download(meta):
+                    download_song(
+                        album_title=album_title,
+                        target_path=target_path,
+                        track_title=track_title,
+                        artist_name=artist_name,
+                    )
+            else:
+                download_song(
+                    album_title=album_title,
+                    target_path=target_path,
+                    track_title=track_title,
+                    artist_name=artist_name,
+                )
+
+        answer = input(
+            "\nEnd of track list reached. Do you want to continue with"
+            " another album? (press y for yes; press any key for no)\n"
+        )
+        if answer != "y":
+            break
 
 
 if __name__ == "__main__":
