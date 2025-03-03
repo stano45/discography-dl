@@ -31,9 +31,7 @@ class YTDL:
         just_meta=False,
     ):
         # append track name to ytsearch option in ytdl
-        track_url = "ytsearch1:{} {} {}".format(
-            artist_name, album_title, track_title
-        )
+        track_url = "ytsearch1:{} {}".format(artist_name, track_title)
 
         # set output path using the user's home directory
         # for cross-platform compatibility
@@ -62,11 +60,11 @@ class YTDL:
             "{}.%(ext)s".format(track_title),
         )
 
-        # check if the song is already downloaded
+        # check if the track is already downloaded
         for file in os.listdir(target_path):
             filename = os.fsdecode(file)
             if filename == "{}.mp3".format(track_title):
-                print("File already cached.")
+                print("Track already downloaded, skipping.")
                 return None
 
         try:

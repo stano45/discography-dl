@@ -65,13 +65,13 @@ def enter_path():
 def select_mode():
     answer = input(
         "\nEnable interactive mode?\n"
-        "Note: some songs might be incorrectly chosen in automatic mode.\n"
+        "Note: some tracks might be incorrectly chosen in automatic mode.\n"
         "(type y for interactive; any key for automatic)\n"
     )
     return True if answer.lower() == "y" else False
 
 
-def download_song(target_path, artist_name, album_title, track_title):
+def download_track(target_path, artist_name, album_title, track_title):
     print(f"\nDownloading track: {track_title}")
     if yt.download_track(
         album_title=album_title,
@@ -113,14 +113,14 @@ def main():
                     just_meta=True,
                 )
                 if meta and confirm_download(meta):
-                    download_song(
+                    download_track(
                         album_title=album_title,
                         target_path=target_path,
                         track_title=track_title,
                         artist_name=artist_name,
                     )
             else:
-                download_song(
+                download_track(
                     album_title=album_title,
                     target_path=target_path,
                     track_title=track_title,
