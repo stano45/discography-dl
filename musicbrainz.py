@@ -14,7 +14,6 @@ class MusicBrainzAPI:
         params = {
             "query": f"artist:{self.artist}",
             "fmt": "json",
-            "limit": 10,  # limit results for simplicity
         }
         response = requests.get(url, headers=headers, params=params)
         if response.status_code != 200:

@@ -73,7 +73,7 @@ def select_mode():
 
 def download_track(target_path, artist_name, album_title, track_title):
     print(f"\nDownloading track: {track_title}\n")
-    if youtube_api.download_track(
+    if youtube_api.download_from_track_title(
         album_title=album_title,
         target_path=target_path,
         track_title=track_title,
@@ -107,19 +107,47 @@ def main():
                 print(
                     "\nDownloading info about track: {}\n".format(track_title)
                 )
-                meta = youtube_api.download_track(
+                meta = youtube_api.download_from_track_title(
                     album_title=album_title,
                     target_path=target_path,
                     track_title=track_title,
                     artist_name=artist_name,
                     just_meta=True,
                 )
-                if meta and confirm_download(meta):
-                    download_track(
-                        album_title=album_title,
-                        target_path=target_path,
-                        track_title=track_title,
-                        artist_name=artist_name,
+                if meta:
+                    if confirm_download(meta):
+                        download_track(
+                            album_title=album_title,
+                            target_path=target_path,
+                            track_title=track_title,
+                            artist_name=artist_name,
+                        )
+                    else:
+                        alt_url = input(
+                            "\nWould you like to provide an alternate URL for the song?\n"
+                            "(Enter URL or press enter to skip):\n"
+                        ).strip()
+                        if alt_url:
+                            alt_meta = youtube_api.download_from_url(
+                                album_title=album_title,
+                                target_path=target_path,
+                                url=alt_url,
+                                output_name=track_title,
+                                artist_name=artist_name,
+                                just_meta=False,
+                            )
+                            if alt_meta:
+                                print("\nDownload successful.\n")
+                            else:
+                                print("\nDownload unsuccessful.\n")
+                            print("-" * 60)
+                        else:
+                            print("Skipping track.")
+                else:
+                    print(
+                        "No metadata found for track: {}, skipping.".format(
+                            track_title
+                        )
                     )
             else:
                 download_track(
@@ -133,7 +161,7 @@ def main():
             "\nEnd of track list reached. Do you want to continue with"
             " another album? (press y for yes; press any key for no)\n"
         )
-        if answer != "y":
+        if answer.lower() != "y":
             break
 
 
