@@ -1,7 +1,7 @@
 import requests
 
 
-class TrackQuery:
+class MusicBrainzAPI:
     def __init__(self, artist):
         self.artist = artist
 

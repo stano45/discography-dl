@@ -4,11 +4,10 @@ import os
 import sys
 from contextlib import contextmanager
 
-import yt_dlp as youtube_dl
+import yt_dlp
 
 
-class YTDL:
-
+class YoutubeAPI:
     def __init__(self, ydl_opts):
         self.ydl_opts = ydl_opts
 
@@ -69,9 +68,9 @@ class YTDL:
 
         try:
             print("-" * 60)
-            with youtube_dl.YoutubeDL(self.ydl_opts) as ydl:
+            with yt_dlp.YoutubeDL(self.ydl_opts) as ydl:
                 info_dict = ydl.extract_info(track_url, download=not just_meta)
-        except youtube_dl.utils.DownloadError:
+        except yt_dlp.utils.DownloadError:
             print("-" * 60)
             print("Video not found.")
             return None

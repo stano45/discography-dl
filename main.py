@@ -1,7 +1,7 @@
 import sys
 
-from musicbrainz import TrackQuery
-from youtube_download import YTDL
+from musicbrainz import MusicBrainzAPI
+from youtube import YoutubeAPI
 
 ydl_opts = {
     "format": "bestaudio/best",
@@ -13,7 +13,7 @@ ydl_opts = {
         }
     ],
 }
-yt = YTDL(ydl_opts)
+youtube_api = YoutubeAPI(ydl_opts)
 
 
 def enter_artist():
@@ -72,8 +72,8 @@ def select_mode():
 
 
 def download_track(target_path, artist_name, album_title, track_title):
-    print(f"\nDownloading track: {track_title}")
-    if yt.download_track(
+    print(f"\nDownloading track: {track_title}\n")
+    if youtube_api.download_track(
         album_title=album_title,
         target_path=target_path,
         track_title=track_title,
@@ -82,7 +82,7 @@ def download_track(target_path, artist_name, album_title, track_title):
         print("\nDownload successful.\n")
     else:
         print("\nDownload unsuccessful.\n")
-    print("---------------------------------------------------------------")
+    print("-" * 60)
 
 
 def main():
@@ -91,9 +91,11 @@ def main():
 
     while True:
         artist_name = enter_artist()
-        track_query = TrackQuery(artist_name)
+        musicbrainz_api = MusicBrainzAPI(artist_name)
         # Replace artist name with the one returned by the scraper
-        artist_name, album_title, track_list = track_query.get_album_tracks()
+        artist_name, album_title, track_list = (
+            musicbrainz_api.get_album_tracks()
+        )
         if len(track_list) < 1:
             if try_again():
                 main()
@@ -105,7 +107,7 @@ def main():
                 print(
                     "\nDownloading info about track: {}\n".format(track_title)
                 )
-                meta = yt.download_track(
+                meta = youtube_api.download_track(
                     album_title=album_title,
                     target_path=target_path,
                     track_title=track_title,
